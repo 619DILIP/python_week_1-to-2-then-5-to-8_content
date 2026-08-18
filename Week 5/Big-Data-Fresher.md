@@ -2,191 +2,520 @@
 
 After completing this module, learners will be able to:
 
-- Define Big Data in simple terms.
-- Explain the history and evolution of Big Data.
-- Describe the 5 V’s of Big Data.
-- Differentiate between traditional SQL systems and Hadoop.
-- Identify advantages and disadvantages of Big Data.
+- Explain the purpose of Hadoop in Big Data systems.
+- Explain the purpose of HDFS.
+- Describe the roles of NameNode and DataNode.
+- Explain how files are stored as blocks in HDFS.
+- Explain the purpose of data replication and fault tolerance.
+- Describe the basic MapReduce processing model.
+- Explain the purpose of Apache Spark.
+- Explain what PySpark is and how it is used.
+- Create and work with basic PySpark DataFrames.
+- Perform basic data transformations and aggregations using PySpark.
+- Describe a basic end-to-end Big Data workflow.
 
 </details>
 
 <details><summary>Description</summary>
 
-## What is Big Data?
+## Introduction
 
-Big Data refers to extremely large and complex datasets that grow rapidly over time. These datasets may be structured, semi-structured, or unstructured.
+The previous modules introduced:
 
-Traditional database systems cannot efficiently store or process such large volumes of data. This limitation led to the development of distributed systems like Hadoop.
+- What Big Data is
+- The 6 V's of Big Data
+- The components of a Big Data system
+- The flow of data through a Big Data architecture
 
----
+This module focuses on how these concepts can be implemented using common Big Data technologies.
 
-## History of Big Data
+The primary technologies covered are:
 
-The concept of Big Data evolved as data generation increased due to:
-
-- Growth of the internet  
-- Social media platforms  
-- E-commerce transactions  
-- Mobile devices  
-- IoT devices  
-
-As organizations began generating terabytes and petabytes of data, traditional systems became insufficient.
-
-<br>
-
-![History](Images/history.PNG)
-
-<br>
+- Hadoop
+- HDFS
+- MapReduce
+- Apache Spark
+- PySpark
 
 ---
 
-## 5 V’s of Big Data
+## What is Hadoop?
 
-- **Volume**  
-  Refers to the massive amount of data generated.
+Hadoop is a distributed framework designed to store and process large datasets across multiple machines.
 
-- **Variety**  
-  Refers to different types of data: structured, semi-structured, and unstructured.
+Instead of depending on a single machine, Hadoop distributes data and processing across a cluster.
 
-- **Velocity**  
-  Refers to the speed at which data is generated and processed.
+A simplified Hadoop workflow is:
 
-- **Variability**  
-  Refers to inconsistency and changing meaning of data over time or context.
+```text
+Large Dataset
+      ↓
+Distributed Storage
+      ↓
+Distributed Processing
+      ↓
+Results
+```
 
-- **Value**  
-  Refers to meaningful insights or business benefits derived from data.
+Hadoop is designed around concepts such as:
 
-<br>
-
-![five_v's](Images/five_v's.PNG)
-
-<br>
-
----
-
-## SQL vs Hadoop
-
-| **Feature**     | **Hadoop**                                                                 | **SQL (Traditional RDBMS)**                                     |
-|-----------------|----------------------------------------------------------------------------|------------------------------------------------------------------|
-| Technology      | Modern distributed framework                                               | Traditional relational database system                          |
-| Data Volume     | Handles Terabytes to Petabytes                                             | Handles Megabytes to Gigabytes                                  |
-| Data Type       | Structured, semi-structured, unstructured                                  | Primarily structured data                                       |
-| Fault Tolerance | Highly fault tolerant (data replication across nodes)                     | Limited fault tolerance depending on setup                      |
-| Storage         | Distributed file system (HDFS)                                             | Centralized storage with fixed schema                           |
-| Scaling         | Horizontal scaling (add more machines)                                     | Vertical scaling (increase machine capacity)                    |
-
-Hadoop is designed for large-scale distributed data processing, while SQL databases are optimized for structured data and transactional systems.
+- Distributed storage
+- Distributed processing
+- Scalability
+- Fault tolerance
 
 ---
 
-## Advantages of Big Data
+## Hadoop Distributed File System (HDFS)
 
-- Enables innovative solutions.
-- Improves customer understanding and targeting.
-- Optimizes business processes.
-- Supports scientific research and analytics.
-- Enhances healthcare systems through patient data analysis.
-- Used in trading, sports analytics, security, and law enforcement.
+HDFS is a distributed file system used to store large files across multiple machines.
+
+Instead of storing an entire large file on one machine, HDFS divides the file into blocks and distributes those blocks across nodes.
+
+```text
+Large File
+     ↓
+Split into Blocks
+     ↓
+┌────────┬────────┬────────┐
+│Block 1 │Block 2 │Block 3 │
+└────────┴────────┴────────┘
+     ↓        ↓        ↓
+   Node 1   Node 2   Node 3
+```
+
+HDFS is designed to provide:
+
+- Distributed storage
+- Scalability
+- Fault tolerance
+- Reliable access to large datasets
 
 ---
 
-## Disadvantages of Big Data
+## HDFS Components
 
-- Storage infrastructure can be expensive.
-- Managing unstructured data is complex.
-- Privacy concerns and ethical issues.
-- Risk of data misuse or manipulation.
-- Rapid data changes may lead to inaccurate insights.
-- Requires skilled professionals for implementation.
+### NameNode
+
+The NameNode manages metadata about files and directories in HDFS.
+
+It keeps track of information such as:
+
+- File names
+- Directory structure
+- File blocks
+- Locations of blocks
+
+The NameNode does not normally store the actual user data blocks.
+
+### DataNode
+
+DataNodes store the actual data blocks.
+
+DataNodes communicate with the NameNode and perform operations involving the stored data.
+
+Simplified architecture:
+
+```text
+             NameNode
+          Metadata Manager
+                │
+       ┌────────┼────────┐
+       ↓        ↓        ↓
+   DataNode  DataNode  DataNode
+   Blocks    Blocks    Blocks
+```
+
+---
+
+## HDFS Blocks and Replication
+
+HDFS divides large files into blocks.
+
+Blocks can be replicated across multiple DataNodes.
+
+Replication helps provide fault tolerance.
+
+For example:
+
+```text
+Block A
+  ├── DataNode 1
+  ├── DataNode 2
+  └── DataNode 3
+```
+
+If one DataNode becomes unavailable, another replica can be used.
+
+This helps prevent data loss caused by individual node failures.
+
+---
+
+## Hadoop MapReduce
+
+MapReduce is a distributed batch-processing model.
+
+It processes large datasets by dividing the work across multiple machines.
+
+The basic model consists of:
+
+```text
+Input
+  ↓
+Map
+  ↓
+Reduce
+  ↓
+Output
+```
+
+### Map Phase
+
+The Map phase processes input data and produces intermediate key-value pairs.
+
+For example, a word-count operation may transform input into:
+
+```text
+("hello", 1)
+("big", 1)
+("data", 1)
+("hello", 1)
+```
+
+### Reduce Phase
+
+The Reduce phase combines intermediate results.
+
+For example:
+
+```text
+("hello", 2)
+("big", 1)
+("data", 1)
+```
+
+MapReduce is useful for distributed batch processing of large datasets.
+
+---
+
+## Apache Spark
+
+Apache Spark is a distributed data-processing framework.
+
+Spark can support:
+
+- Batch processing
+- DataFrame processing
+- SQL operations
+- Streaming workloads
+- Machine learning workloads
+
+Spark can perform many operations efficiently and can use in-memory processing to reduce repeated disk access.
+
+---
+
+## Hadoop MapReduce vs Spark
+
+| Feature | MapReduce | Spark |
+|---|---|---|
+| Processing | Primarily batch | Batch and other workloads |
+| Intermediate data | Commonly written to disk | Can use memory for intermediate processing |
+| Processing speed | Generally slower for iterative workloads | Generally faster for many iterative workloads |
+| APIs | Map and Reduce model | DataFrames, SQL, APIs |
+| Python support | More limited | PySpark |
+
+The choice of technology depends on the requirements of the workload.
+
+---
+
+## What is PySpark?
+
+PySpark is the Python API for Apache Spark.
+
+It allows developers to use Python to work with Spark's distributed processing capabilities.
+
+PySpark is commonly used for:
+
+- Data processing
+- Data transformation
+- Data analysis
+- Data aggregation
+- Data engineering
+- Machine learning workflows
+
+---
+
+## PySpark DataFrames
+
+A DataFrame is a distributed collection of data organized into named columns.
+
+For example:
+
+```text
++----------+----------+------+
+| product  | quantity | price|
++----------+----------+------+
+| Laptop   | 2        | 800  |
+| Phone    | 5        | 500  |
+| Tablet   | 3        | 300  |
++----------+----------+------+
+```
+
+PySpark provides operations for:
+
+- Selecting columns
+- Filtering rows
+- Grouping data
+- Aggregating values
+- Sorting
+- Transforming data
+
+---
+
+## Basic PySpark Workflow
+
+A typical PySpark workflow is:
+
+```text
+Read Data
+    ↓
+Create DataFrame
+    ↓
+Inspect Data
+    ↓
+Transform Data
+    ↓
+Aggregate Data
+    ↓
+Analyze Results
+    ↓
+Write Output
+```
 
 </details>
 
 <details><summary>Real World Application</summary>
 
-## Media and Entertainment Industry
+## E-Commerce Sales Analysis
 
-Streaming platforms such as Spotify use Big Data analytics to:
+An e-commerce company stores millions of transaction records.
 
-- Collect listening history from millions of users.
-- Analyze user behavior patterns.
-- Recommend personalized playlists.
-- Predict trending songs.
+Each transaction may contain:
 
-By analyzing massive user data in real time, these platforms improve customer experience and retention.
+- Customer information
+- Product information
+- Quantity
+- Price
+- Transaction timestamp
 
-Big Data enables personalized recommendations at a global scale.
+A Big Data workflow can be used to calculate:
+
+- Total sales
+- Sales by product
+- Most purchased products
+- Customer purchase trends
+
+A simplified architecture is:
+
+```text
+E-Commerce Transactions
+          ↓
+        HDFS
+          ↓
+       PySpark
+          ↓
+     DataFrame
+          ↓
+ Transform / Aggregate
+          ↓
+       Results
+```
+
+This demonstrates how distributed storage and processing technologies can work together to analyze large datasets.
 
 </details>
 
 <details><summary>Implementation</summary>
 
-## How Big Data Systems Are Implemented
+## End-to-End Big Data Workflow Using Hadoop and PySpark
 
-For a fresher-level understanding, Big Data implementation typically follows these steps:
+Consider a dataset containing e-commerce sales.
 
----
+### Step 1: Collect Data
 
-### Step 1: Data Collection
+Data may come from:
 
-Data is collected from:
-
-- Websites
 - Applications
-- Social media
-- Sensors
 - Transaction systems
+- CSV files
+- JSON files
+- Application logs
+
+Example:
+
+```text
+sales.csv
+```
 
 ---
 
-### Step 2: Data Storage
+### Step 2: Store Data in HDFS
 
-Large volumes of data are stored in distributed systems such as Hadoop Distributed File System (HDFS).
+The sales data can be stored in HDFS.
 
-Instead of storing data on a single machine, data is split into blocks and distributed across multiple nodes.
+Conceptually:
 
----
+```text
+sales.csv
+    ↓
+HDFS
+    ↓
+Distributed Blocks
+    ↓
+Multiple DataNodes
+```
 
-### Step 3: Data Processing
-
-Data is processed using distributed processing frameworks such as:
-
-- Hadoop MapReduce
-- Apache Spark
-
-Processing may include:
-
-- Aggregation
-- Filtering
-- Pattern detection
-- Data transformation
+HDFS provides distributed storage and fault tolerance.
 
 ---
 
-### Step 4: Data Analysis
+### Step 3: Read the Data Using PySpark
 
-Processed data is analyzed to:
+PySpark can read the data and create a DataFrame.
 
-- Identify trends
-- Predict outcomes
-- Improve business decisions
+```python
+from pyspark.sql import SparkSession
+
+spark = (
+    SparkSession.builder
+        .appName("SalesAnalysis")
+        .getOrCreate()
+)
+
+df = spark.read.csv(
+    "hdfs://path/to/sales.csv",
+    header=True,
+    inferSchema=True
+)
+
+df.show()
+```
 
 ---
 
-### Step 5: Reporting and Visualization
+### Step 4: Transform the Data
 
-Insights are presented using dashboards, reports, or analytics tools to support decision-making.
+PySpark can be used to filter, select, and transform records.
+
+For example:
+
+```python
+result = df.filter(df.amount > 100)
+```
+
+This selects transactions where the amount is greater than 100.
 
 ---
 
-## Key Implementation Concepts for Freshers
+### Step 5: Aggregate the Data
 
-- Distributed storage
-- Parallel processing
-- Horizontal scalability
-- Fault tolerance
+Data can be grouped and aggregated.
 
-These concepts form the foundation of modern Big Data systems.
+For example:
+
+```python
+result = df.groupBy("product_name").sum("amount")
+```
+
+This calculates the total sales amount for each product.
+
+---
+
+### Step 6: Display the Results
+
+```python
+result.show()
+```
+
+The results can then be used for further analysis or reporting.
+
+---
+
+## Complete Example
+
+```python
+from pyspark.sql import SparkSession
+
+spark = (
+    SparkSession.builder
+        .appName("SalesAnalysis")
+        .getOrCreate()
+)
+
+df = spark.read.csv(
+    "hdfs://path/to/sales.csv",
+    header=True,
+    inferSchema=True
+)
+
+result = df.groupBy("product_name").sum("amount")
+
+result.show()
+
+spark.stop()
+```
+
+---
+
+## Key Implementation Concepts
+
+### Distributed Storage
+
+HDFS distributes data across multiple machines.
+
+### Distributed Processing
+
+Spark can distribute processing workloads across multiple machines.
+
+### Parallel Execution
+
+Multiple tasks can execute simultaneously across the cluster.
+
+### Fault Tolerance
+
+Distributed systems can continue operating when individual nodes fail, depending on the architecture and configuration.
+
+### Scalability
+
+Additional machines can be added to increase the capacity of the system.
+
+---
+
+## End-to-End Architecture
+
+The concepts covered in this module can be combined into the following workflow:
+
+```text
+                DATA SOURCES
+                     ↓
+               DATA INGESTION
+                     ↓
+                   HDFS
+                     ↓
+              Hadoop / Spark
+                     ↓
+                  PySpark
+                     ↓
+                DataFrame
+                     ↓
+          Transform / Aggregate
+                     ↓
+                Data Analysis
+                     ↓
+             Reporting / Output
+```
+
+This workflow connects the concepts introduced throughout the Big Data curriculum.
 
 </details>
 
@@ -194,14 +523,32 @@ These concepts form the foundation of modern Big Data systems.
 
 In this module, we learned:
 
-- Big Data refers to massive and complex datasets that traditional systems cannot efficiently process.
-- The evolution of Big Data was driven by rapid digital growth.
-- The 5 V’s define Big Data characteristics.
-- Hadoop differs from traditional SQL databases in architecture and scalability.
-- Big Data offers significant benefits but also presents technical and ethical challenges.
-- Big Data systems follow a structured implementation approach from collection to analysis.
+- Hadoop provides a framework for distributed Big Data storage and processing.
+- HDFS provides distributed storage for large datasets.
+- The NameNode manages HDFS metadata.
+- DataNodes store actual data blocks.
+- HDFS replication provides fault tolerance.
+- MapReduce provides a distributed batch-processing model.
+- Apache Spark provides distributed data-processing capabilities.
+- PySpark allows developers to use Python with Apache Spark.
+- PySpark DataFrames provide a convenient way to process structured data.
+- Big Data workflows can combine HDFS and PySpark to store, process, and analyze large datasets.
 
-Understanding these fundamentals prepares learners for deeper Big Data concepts and technologies.
+The overall workflow is:
+
+```text
+Collect
+  ↓
+Store
+  ↓
+Process
+  ↓
+Analyze
+  ↓
+Report
+```
+
+These concepts provide a foundation for further learning in Big Data engineering and analytics.
 
 </details>
 

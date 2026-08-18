@@ -1,303 +1,242 @@
-<details><summary>Learning Objectives</summary>
+<details><summary> Learning Objectives </summary>
 
-After completing this module, learners should be able to:
+By the end of this lesson, learners should be able to:
 
-- Differentiate between Hadoop, MapReduce, and Apache Spark.
-- Compare performance characteristics of MapReduce and Spark.
-- Explain architectural differences.
-- Identify suitable use cases for each framework.
-- Understand trade-offs in cost, latency, and scalability.
+-   Understand why Apache Hive is used in big data ecosystems.
+-   Explain the modern Hive architecture and execution engines (Tez,
+    Spark).
+-   Identify how Hive stores data in HDFS and cloud storage systems.
+-   Modify Hive warehouse storage locations.
+-   Understand the Hive Metastore and its deployment modes.
+-   Connect to Hive using Python.
+-   Compare Hive with modern alternatives such as Spark SQL and Presto.
+</details>
+
+<details><summary> Description </summary>
+
+Apache Hive is an open-source distributed data warehouse system built on
+top of Hadoop. It enables users to query and analyze massive datasets
+stored in distributed storage systems using SQL-like queries called Hive
+Query Language (HQL).
+
+Originally developed by Facebook and later contributed to the Apache
+Software Foundation, Hive was designed to make big data querying
+accessible to users familiar with SQL.
+
+### Why Hive?
+
+Traditional relational databases struggle when:
+
+-   Data grows into terabytes or petabytes.
+-   Horizontal scalability is required.
+-   Fault tolerance is necessary.
+-   Schema flexibility is important.
+
+Hive addresses these challenges by:
+
+-   Allowing SQL-based querying on distributed storage.
+-   Scaling horizontally across clusters.
+-   Providing fault tolerance through HDFS replication.
+-   Supporting schema-on-read design.
+
+### Modern Hive Execution Engines
+
+Earlier versions of Hive relied heavily on MapReduce. Modern Hive
+deployments primarily use:
+
+-   Apache Tez (default in many clusters)
+-   Apache Spark (optional execution engine)
+-   MapReduce (legacy support)
+
+### Hive Architecture Overview
+
+1.  Clients (CLI, Beeline, JDBC, ODBC, Python via PyHive)
+2.  HiveServer2 (handles sessions and client communication)
+3.  Driver (parses and manages queries)
+4.  Compiler & Optimizer (creates optimized execution plan)
+5.  Execution Engine (Tez/Spark/MapReduce)
+6.  Storage Layer (HDFS or Cloud Object Storage)
+
+### Hive Storage Location
+
+By default, Hive stores tables in:
+
+/user/hive/warehouse
+
+Each database is stored as a subdirectory inside the warehouse
+directory.
+
+### Hive Metastore
+
+The Hive Metastore stores metadata including:
+
+-   Table schema
+-   Column data types
+-   Partition information
+-   Storage format
+-   File locations
+
+Production deployments typically use MySQL or PostgreSQL instead of the
+default embedded Derby database.
+
+### Metastore Deployment Modes
+
+1.  Embedded Mode (Development only, single session)
+2.  Local Mode (Metastore in same JVM, external database)
+3.  Remote Mode (Production standard, separate metastore service)
+
+### Limitations of Hive
+
+Modern Hive supports ACID transactions, subqueries, and basic
+UPDATE/DELETE operations. However:
+
+-   It is not suitable for high-frequency OLTP workloads.
+-   Query latency is higher than interactive engines.
+-   It is optimized primarily for batch analytics.
 
 </details>
 
-<details><summary>Description</summary>
+<details><summary> Real World Application </summary>
 
-## Understanding the Components
+Hive is widely used in industries that manage massive structured
+datasets.
 
-Before comparing, it is important to clarify the roles:
+### Banking and Finance
 
-- **Hadoop** is an ecosystem for distributed storage and processing.
-- **MapReduce** is Hadoop’s original processing model.
-- **Spark** is a separate distributed data processing engine that can run independently or on Hadoop (via YARN).
+-   Risk analysis
+-   Fraud detection
+-   Loan portfolio management
+-   Regulatory reporting
 
-Hadoop includes:
-- HDFS (Storage)
-- YARN (Resource Management)
-- MapReduce (Processing)
+### Retail and E-commerce
 
-Spark can:
-- Run on YARN
-- Use HDFS for storage
-- Replace MapReduce as a processing engine
+-   Customer behavior analytics
+-   Purchase pattern analysis
+-   Promotion effectiveness tracking
+-   Inventory analysis
 
-# Key Differences
+### Healthcare
 
-## 1. Speed
+-   Disease trend analysis
+-   Medical research data aggregation
+-   Reporting and compliance analytics
 
-### Apache Spark
-- Processes data in memory.
-- Up to 100× faster in-memory.
-- Around 10× faster on disk compared to MapReduce.
-- Reduces disk read/write cycles.
+### Log and Event Processing
 
-### Hadoop MapReduce
-- Disk-based processing.
-- Writes intermediate data to disk.
-- Slower due to repeated disk I/O.
+-   Application log analytics
+-   Clickstream analysis
+-   Batch ETL pipelines
 
----
-
-## 2. Ease of Use
-
-### Apache Spark
-- Provides high-level APIs.
-- Supports Scala, Python, Java, and R.
-- Uses RDDs and DataFrames.
-- Supports interactive processing.
-
-### Hadoop MapReduce
-- Requires writing Map and Reduce logic manually.
-- More boilerplate code.
-- No interactive mode.
-- More complex development.
-
----
-
-## 3. Latency
-
-### Apache Spark
-- Low latency.
-- Suitable for real-time and interactive analytics.
-
-### Hadoop MapReduce
-- High latency.
-- Designed primarily for batch processing.
-
----
-
-## 4. Data Processing Capabilities
-
-### Apache Spark
-Supports:
-- Batch processing
-- Streaming
-- Machine learning
-- Graph processing
-- Interactive SQL
-
-### Hadoop MapReduce
-Supports:
-- Batch processing only
-
----
-
-## 5. Failure Recovery
-
-### Hadoop MapReduce
-- Strong fault tolerance.
-- Resumes failed tasks automatically.
-- Based on disk-based checkpoints.
-
-### Apache Spark
-- Fault tolerance via lineage (RDD).
-- Recomputes lost partitions.
-- Efficient but memory-heavy workloads may require tuning.
-
----
-
-## 6. Cost Consideration
-
-### Hadoop MapReduce
-- Requires less memory.
-- Lower hardware cost.
-- Suitable for budget-constrained batch workloads.
-
-### Apache Spark
-- Memory-intensive.
-- Requires higher RAM.
-- Higher infrastructure cost.
-
----
-
-## 7. Security
-
-Both integrate with Hadoop ecosystem security:
-
-- Kerberos authentication
-- HDFS permissions
-- YARN-based access control
-
-Security depends on configuration rather than framework default.
-
----
-
-# Comparison Table
-
-| Factor | MapReduce | Spark |
-|---------|------------|--------|
-| Processing Type | Batch | Batch + Streaming + ML |
-| Speed | Disk-based, slower | In-memory, much faster |
-| Ease of Use | Complex | High-level APIs |
-| Latency | High | Low |
-| Interactive Mode | No | Yes |
-| Machine Learning | Limited | Built-in MLlib |
-| Graph Processing | No native support | GraphX |
-| Streaming | Not supported | Spark Streaming |
-| Memory Usage | Low | High |
-| Suitable For | Large batch jobs | Real-time & advanced analytics |
+Hive is particularly useful when large-scale historical data analysis is
+required rather than real-time processing.
 
 </details>
 
-<details><summary>Real World Application</summary>
+<details><summary> Implementation </summary>
 
-## Hadoop MapReduce Use Case
+### Example Hive Query
 
-Imagine you have 10 large datasets (bags of data).  
-Each mapper processes one dataset in parallel.  
-The reducer aggregates the results.
+```sql
+SELECT fname, id, AVG(marks) FROM students WHERE class IN
+('10th','11th') GROUP BY id HAVING AVG(marks) \> 50 ORDER BY AVG(marks);
+```
 
-Used for:
-- Daily ETL jobs
-- Log aggregation
-- Data warehousing batch tasks
+### Viewing Execution Plan
 
-Industries:
-- Banking
-- Telecom
-- Government archives
+```sql
+EXPLAIN SELECT * FROM students;
+```
+### Checking Table Location
 
----
+```sql
+DESCRIBE FORMATTED table_name;
+```
 
-## Apache Spark Use Case
+### Creating Table with Custom Location
 
-Spark is used when real-time speed matters.
+```sql
+CREATE TABLE test ( name STRING, id INT ) ROW FORMAT DELIMITED FIELDS
+TERMINATED BY ',' STORED AS TEXTFILE LOCATION '/user/demo/test';
+```
 
-Example:
-- Real-time fraud detection
-- Recommendation systems
-- Live dashboard analytics
-- Streaming analytics
+### Altering Table Location
 
-Industries:
-- E-commerce
-- FinTech
-- Media platforms
-- Machine learning pipelines
+```sql
+ALTER TABLE test SET LOCATION '/user/new_location';
+```
 
----
+### Changing Default Warehouse Location
 
-## When to Choose What?
+In hive-site.xml:
 
-Choose MapReduce when:
-- Processing large historical batch datasets
-- Budget constraints exist
-- Simpler batch pipeline required
+```xml
+<property>
+<name>hive.metastore.warehouse.dir</name>
+<value>/data/hive/warehouse</value>
+</property>
+```
 
-Choose Spark when:
-- Low latency is required
-- Machine learning needed
-- Interactive analytics required
-- Real-time streaming required
+## Python Integration with Hive
 
-</details>
+Hive can be accessed using Python through the PyHive library.
 
-<details><summary>Implementation</summary>
+### Installing PyHive
 
-## 1️⃣ Hadoop MapReduce (Python via Hadoop Streaming)
+pip install pyhive
 
-### Mapper (mapper.py)
+### Connecting to Hive
 
 ``` python
-#!/usr/bin/env python
-import sys
+from pyhive import hive
 
-for line in sys.stdin:
-    words = line.strip().split()
-    for word in words:
-        print(f"{word}\t1")
+conn = hive.Connection(
+    host="localhost",
+    port=10000,
+    username="hive"
+)
+
+cursor = conn.cursor()
+cursor.execute("SHOW DATABASES")
+
+for db in cursor.fetchall():
+    print(db)
 ```
 
-### Reducer (reducer.py)
+### Running a Query
 
 ``` python
-#!/usr/bin/env python
-import sys
-from itertools import groupby
-from operator import itemgetter
+cursor.execute("""
+SELECT class, AVG(marks)
+FROM students
+GROUP BY class
+HAVING AVG(marks) > 50
+""")
 
-def read_mapper_output(file, separator='\t'):
-    for line in file:
-        yield line.rstrip().split(separator, 1)
-
-data = read_mapper_output(sys.stdin)
-
-for current_word, group in groupby(data, itemgetter(0)):
-    try:
-        total_count = sum(int(count) for _, count in group)
-        print(f"{current_word}\t{total_count}")
-    except ValueError:
-        pass
+results = cursor.fetchall()
+print(results)
 ```
-
-### Execution
-
-``` bash
-hadoop jar hadoop-streaming.jar \
--input input.txt \
--output output \
--mapper mapper.py \
--reducer reducer.py
-```
-
-------------------------------------------------------------------------
-
-## 2️⃣ Apache Spark (PySpark)
-
-``` python
-from pyspark.sql import SparkSession
-
-spark = SparkSession.builder.appName("WordCount").getOrCreate()
-
-text_file = spark.read.text("input.txt")
-
-words = text_file.rdd.flatMap(lambda line: line.value.split())
-
-word_counts = words.map(lambda word: (word, 1)).reduceByKey(lambda a, b: a + b)
-
-word_counts.saveAsTextFile("output")
-
-spark.stop()
-```
-
-### Execution
-
-``` bash
-spark-submit wordcount.py
-```
-
-------------------------------------------------------------------------
-
-## Key Implementation Differences
-
-| Aspect                | MapReduce                     | Spark            |
-|------------------------|--------------------------------|------------------|
-| Code Structure         | Separate mapper & reducer      | Single script    |
-| Intermediate Data      | Written to disk                | Stored in memory |
-| Development Speed      | Slower                         | Faster           |
-| Iterative Processing   | Inefficient                    | Efficient        |
-
-
 </details>
 
-<details><summary>Summary</summary>
-In this module, we learned:
+<details><summary> Summary </summary>
 
-- Hadoop is an ecosystem.
-- MapReduce is a batch processing model within Hadoop.
-- Spark is a fast, in-memory processing engine.
-- Spark outperforms MapReduce in speed and flexibility.
-- MapReduce remains relevant for cost-effective batch workloads.
-- Spark is preferred for real-time and advanced analytics.
+Apache Hive is a distributed SQL-based data warehouse system built for
+large-scale batch analytics. It enables organizations to store and
+process massive datasets using familiar SQL syntax.
+
+Modern Hive integrates with execution engines such as Tez and Spark,
+supports ACID transactions, and works seamlessly with distributed
+storage systems like HDFS and cloud object storage.
+
+Hive remains highly relevant for:
+
+-   Large-scale ETL workflows
+-   Historical data analytics
+-   Enterprise data warehousing
+
+For real-time and interactive analytics, engines like Spark SQL or
+Presto are often preferred. However, Hive continues to be a foundational
+technology in many big data ecosystems, especially in batch-oriented
+data processing pipelines.
 
 </details>
 
